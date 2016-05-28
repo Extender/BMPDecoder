@@ -49,13 +49,15 @@ void MainWindow::buttonClicked(bool checked)
             img->setPixel(x,y,bmpData[y*width+x]);
         }
     }
+    free(bmpData);
+    free(data);
     ui->graphicsView->scene()->clear();
     ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(*img));
 }
 
 void MainWindow::browseButtonClicked(bool checked)
 {
-    dialog->show();
+    dialog->exec();
 }
 
 void MainWindow::fileChanged(QString file)

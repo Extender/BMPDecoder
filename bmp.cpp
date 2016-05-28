@@ -95,7 +95,7 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
     }
 
     uint32_t *out=(uint32_t*)malloc(width*height*4);
-    uint32_t *colorTable;
+    uint32_t *colorTable=0;
     if(bitsPerPixel<16)
     {
         if(paletteColors==0)
@@ -273,6 +273,7 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
                 }
             }
         }
+        free(colorTable);
         return out;
     }
     else if(compressionMethod==BMP_COMPRESSION_RLE8)
@@ -327,6 +328,7 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
                 }
             }
         }
+        free(colorTable);
         return out;
     }
     else if(compressionMethod==BMP_COMPRESSION_RLE4)
@@ -389,7 +391,9 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
                 }
             }
         }
+        free(colorTable);
         return out;
     }
+    free(colorTable);
     return 0;
 }
