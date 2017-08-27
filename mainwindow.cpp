@@ -7,13 +7,18 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->graphicsView->setScene(new QGraphicsScene());
-    connect(ui->pushButton,SIGNAL(clicked(bool)),this,SLOT(buttonClicked(bool)));
-    connect(ui->browseButton,SIGNAL(clicked(bool)),this,SLOT(browseButtonClicked(bool)));
+    connect(ui->loadButton,SIGNAL(clicked(bool)),this,SLOT(loadButtonClicked()));
+    connect(ui->browseButton,SIGNAL(clicked(bool)),this,SLOT(browseButtonClicked()));
     dialog=new QFileDialog(this);
     dialog->setNameFilter("Bitmaps (*.bmp *.dib)");
     connect(dialog,SIGNAL(currentChanged(QString)),this,SLOT(fileChanged(QString)));
-    currentFile=QApplication::applicationDirPath().replace("/","\\")+"\\example.bmp";
-    ui->lineEdit->setText(currentFile);
+    QString testFilePath=QApplication::applicationDirPath()+"/example.bmp";
+    QFile testFile(testFilePath);
+    if(testFile.exists())
+    {
+        currentFile=testFilePath;
+        ui->lineEdit->setText(currentFile);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -21,7 +26,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::buttonClicked(bool checked)
+void MainWindow::loadButtonClicked()
 {
     if(currentFile=="")
     {
@@ -42,9 +47,9 @@ void MainWindow::buttonClicked(bool checked)
     uint32_t *bmpData=bmp::decode(data,width,height);
     QImage *img=new QImage(width,height,QImage::Format_ARGB32);
     img->fill(0xFFFFFFFF);
-    for(uint32_t y=0;y<height;y++)
+    for(int32_t y=0;y<height;y++)
     {
-        for(uint32_t x=0;x<width;x++)
+        for(int32_t x=0;x<width;x++)
         {
             img->setPixel(x,y,bmpData[y*width+x]);
         }
@@ -55,7 +60,7 @@ void MainWindow::buttonClicked(bool checked)
     ui->graphicsView->scene()->addPixmap(QPixmap::fromImage(*img));
 }
 
-void MainWindow::browseButtonClicked(bool checked)
+void MainWindow::browseButtonClicked()
 {
     dialog->exec();
 }
@@ -64,4 +69,5 @@ void MainWindow::fileChanged(QString file)
 {
     currentFile=file;
     ui->lineEdit->setText(file.replace("/","\\"));
+    ui->loadButton->click();
 }

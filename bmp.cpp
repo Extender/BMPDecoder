@@ -22,22 +22,22 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
     int32_t verResInPixelsPerMeter=io::readUInt32(data);
     uint32_t paletteColors=io::readUInt32(data);
     data+=4;
-    uint32_t rowSize=floor((double)(bitsPerPixel*width+31)/32)*4;
+    uint32_t rowSize=(uint32_t)floor((double)(bitsPerPixel*width+31)/32)*4;
 
     // If bitsPerPixel==16: actual masks; shift values stored in *Shift16.
 
-    uint32_t redShift=compressionMethod==BMP_COMPRESSION_BITFIELDS?(bitsPerPixel==16?io::readUInt32(data):(ceil(log2(io::readUInt32(data)))/8))-1:2; // Get bit offset out of this number
-    uint32_t greenShift=compressionMethod==BMP_COMPRESSION_BITFIELDS?(bitsPerPixel==16?io::readUInt32(data):(ceil(log2(io::readUInt32(data)))/8))-1:1;
-    uint32_t blueShift=compressionMethod==BMP_COMPRESSION_BITFIELDS?(bitsPerPixel==16?io::readUInt32(data):(ceil(log2(io::readUInt32(data)))/8))-1:0;
+    uint32_t redShift=compressionMethod==BMP_COMPRESSION_BITFIELDS?(bitsPerPixel==16?io::readUInt32(data):((uint32_t)ceil((double)log2((double)io::readUInt32(data)))/8))-1:2; // Get bit offset out of this number
+    uint32_t greenShift=compressionMethod==BMP_COMPRESSION_BITFIELDS?(bitsPerPixel==16?io::readUInt32(data):((uint32_t)ceil((double)log2((double)io::readUInt32(data)))/8))-1:1;
+    uint32_t blueShift=compressionMethod==BMP_COMPRESSION_BITFIELDS?(bitsPerPixel==16?io::readUInt32(data):((uint32_t)ceil((double)log2((double)io::readUInt32(data)))/8))-1:0;
 
     uint32_t redShift16,greenShift16,blueShift16;
     uint8_t redMax16,greenMax16,blueMax16;
 
     if(bitsPerPixel==16)
     {
-        redShift16=ceil(log2(redShift));
-        greenShift16=ceil(log2(greenShift));
-        blueShift16=ceil(log2(blueShift));
+        redShift16=(uint32_t)ceil((double)log2((double)redShift));
+        greenShift16=(uint32_t)ceil((double)log2((double)greenShift));
+        blueShift16=(uint32_t)ceil((double)log2((double)blueShift));
         if(redShift16>greenShift16)
         {
             if(redShift16>blueShift16)
@@ -99,7 +99,7 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
     if(bitsPerPixel<16)
     {
         if(paletteColors==0)
-            paletteColors=pow(2,bitsPerPixel);
+            paletteColors=(uint32_t)pow(2.0,bitsPerPixel);
         // Color table mandatory if bitsPerPixel<16
         colorTable=(uint32_t*)malloc(4*paletteColors);
         memcpy(colorTable,data,4*paletteColors);
@@ -111,21 +111,21 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
         {
             if(upsideDown)
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
-                        out[(height-y-1)*width+x]=0xFF000000|colorTable[((uint8_t)data[(uint32_t)(y*rowSize+(uint32_t)floor(x/8))]&(1<<(7-(x%8))))>0];
+                        out[(height-y-1)*width+x]=0xFF000000|colorTable[((uint8_t)data[(uint32_t)(y*rowSize+(uint32_t)floor((float)x/8))]&(1<<(7-(x%8))))>0];
                     }
                 }
             }
             else
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
-                        out[y*width+x]=0xFF000000|colorTable[((uint8_t)data[(uint32_t)(y*rowSize+(uint32_t)floor(x/8))]&(1<<(7-(x%8))))>0];
+                        out[y*width+x]=0xFF000000|colorTable[((uint8_t)data[(uint32_t)(y*rowSize+(uint32_t)floor((float)x/8))]&(1<<(7-(x%8))))>0];
                     }
                 }
             }
@@ -134,21 +134,21 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
         {
             if(upsideDown)
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
-                        out[(height-y-1)*width+x]=0xFF000000|colorTable[(((uint8_t)data[(uint32_t)(y*rowSize+(uint32_t)floor(x/2))]&(0xF<<(((x+1)%2)*4))))>>(((x+1)%2)*4)];
+                        out[(height-y-1)*width+x]=0xFF000000|colorTable[(((uint8_t)data[(uint32_t)(y*rowSize+(uint32_t)floor((float)x/2))]&(0xF<<(((x+1)%2)*4))))>>(((x+1)%2)*4)];
                     }
                 }
             }
             else
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
-                        out[y*width+x]=0xFF000000|colorTable[(((uint8_t)data[(uint32_t)(y*rowSize+(uint32_t)floor(x/2))]&(0xF<<(((x+1)%2)*4))))>>(((x+1)%2)*4)];
+                        out[y*width+x]=0xFF000000|colorTable[(((uint8_t)data[(uint32_t)(y*rowSize+(uint32_t)floor((float)x/2))]&(0xF<<(((x+1)%2)*4))))>>(((x+1)%2)*4)];
                     }
                 }
             }
@@ -157,9 +157,9 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
         {
             if(upsideDown)
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
                         uint8_t pixel=(uint8_t)data[y*rowSize+x];
                         out[(height-y-1)*width+x]=0xFF000000|colorTable[pixel];
@@ -168,9 +168,9 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
             }
             else
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
                         uint32_t pixel=(uint8_t)data[y*width+x];
                         out[y*width+x]=0xFF000000|colorTable[pixel];
@@ -182,30 +182,30 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
         {
             if(upsideDown)
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
                         uint32_t offset=y*rowSize+2*x; // Byte at which this pixel starts
                         uint32_t pixel=(uint8_t)data[offset]|((uint32_t)((uint8_t)data[offset+1])<<8);
-                        uint8_t r=((double)((pixel&redShift)>>redShift16)/redMax16)*255;
-                        uint8_t g=((double)((pixel&greenShift)>>greenShift16)/greenMax16)*255;
-                        uint8_t b=((double)((pixel&blueShift)>>blueShift16)/blueMax16)*255;
+                        uint8_t r=(uint8_t)(((double)((pixel&redShift)>>redShift16)/redMax16)*255);
+                        uint8_t g=(uint8_t)(((double)((pixel&greenShift)>>greenShift16)/greenMax16)*255);
+                        uint8_t b=(uint8_t)(((double)((pixel&blueShift)>>blueShift16)/blueMax16)*255);
                         out[(height-y-1)*width+x]=0xFF000000|(r<<16)|(g<<8)|b;
                     }
                 }
             }
             else
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
                         uint32_t offset=y*rowSize+2*x; // Byte at which this pixel starts
                         uint32_t pixel=(uint8_t)data[offset]|((uint32_t)((uint8_t)data[offset+1])<<8);
-                        uint8_t r=((double)((pixel&redShift)>>redShift16)/redMax16)*255;
-                        uint8_t g=((double)((pixel&greenShift)>>greenShift16)/greenMax16)*255;
-                        uint8_t b=((double)((pixel&blueShift)>>blueShift16)/blueMax16)*255;
+                        uint8_t r=(uint8_t)(((double)((pixel&redShift)>>redShift16)/redMax16)*255);
+                        uint8_t g=(uint8_t)(((double)((pixel&greenShift)>>greenShift16)/greenMax16)*255);
+                        uint8_t b=(uint8_t)(((double)((pixel&blueShift)>>blueShift16)/blueMax16)*255);
                         out[y*width+x]=0xFF000000|(r<<16)|(g<<8)|b;
                     }
                 }
@@ -215,9 +215,9 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
         {
             if(upsideDown)
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
                         uint32_t offset=y*rowSize+3*x; // Byte at which this pixel starts
                         uint32_t b=(uint8_t)data[offset+blueShift];
@@ -229,9 +229,9 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
             }
             else
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
                         uint32_t offset=y*rowSize+3*x; // Byte at which this pixel starts
                         uint32_t b=(uint8_t)data[offset+blueShift];
@@ -246,9 +246,9 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
         {
             if(upsideDown)
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
                         uint32_t offset=y*rowSize+4*x; // Byte at which this pixel starts
                         uint32_t b=(uint8_t)data[offset+blueShift];
@@ -260,9 +260,9 @@ uint32_t *bmp::decode(char *data, int32_t &width, int32_t &height)
             }
             else
             {
-                for(uint32_t y=0;y<height;y++)
+                for(int32_t y=0;y<height;y++)
                 {
-                    for(uint32_t x=0;x<width;x++)
+                    for(int32_t x=0;x<width;x++)
                     {
                         uint32_t offset=y*rowSize+4*x; // Byte at which this pixel starts
                         uint32_t b=(uint8_t)data[offset+blueShift];

@@ -24,8 +24,8 @@ public:
     ~MainWindow();
 
 public slots:
-    void buttonClicked(bool checked);
-    void browseButtonClicked(bool checked);
+    void loadButtonClicked();
+    void browseButtonClicked();
     void fileChanged(QString file);
 
 private:
